@@ -1,0 +1,19 @@
+{
+  "heroTitle": "Type a sentence.\nGet an image.",
+  "heroSubtitle": "Free AI image generation, no credit card, no watermark. Describe what you want to see and ImagineGen renders it in seconds — built for creators, students, and small businesses who need visuals fast.",
+  "freeGenerationsBeforeSignin": 5,
+  "dailyGenerationCap": 100,
+  "blockedTerms": [
+    "child sexual",
+    "csam",
+    "minor nude",
+    "nonconsensual",
+    "deepfake nude"
+  ],
+  "promptLibrary": [
+    { "style": "Storybook illustration", "text": "A cozy treehouse village at dusk, warm lantern light, hand-drawn storybook illustration style" },
+    { "style": "Product mockup", "text": "Minimalist ceramic coffee mug on a marble countertop, soft morning light, product photography" },
+    { "style": "Social post", "text": "Bold flat-design poster announcing a summer sale, bright yellow and coral palette, 1:1" },
+    { "style": "Presentation graphic", "text": "Clean isometric diagram of a solar-powered smart home, pastel colors, for a school presentation" }
+  ]
+}

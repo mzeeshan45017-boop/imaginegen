@@ -1,0 +1,11 @@
+body{margin:0;background:#FAF7F1;color:#241226;font-family:'Inter',system-ui,sans-serif;line-height:1.65;}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px;}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:22px 24px;border-bottom:1px solid #E4DCCB;}
+.brand{font-family:'Fraunces',serif;font-weight:700;font-size:1.2rem;text-decoration:none;color:#241226;}
+main{padding:48px 0 80px;}
+h1{font-family:'Fraunces',serif;font-size:2rem;margin-bottom:6px;}
+.updated{color:#5B4B60;font-size:.85rem;margin-bottom:32px;}
+h2{font-family:'Fraunces',serif;font-size:1.25rem;margin-top:32px;}
+p,li{color:#3A2E3D;}
+a{color:#241226;}
+footer{border-top:1px solid #E4DCCB;padding:24px;text-align:center;font-size:.82rem;color:#5B4B60;}

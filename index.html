@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ImagineGen — free AI image generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F1;
+    --paper-dim:#F1ECE1;
+    --ink:#241226;
+    --ink-soft:#5B4B60;
+    --line:#E4DCCB;
+    --flash:#F5B942;
+    --flash-ink:#3A2600;
+    --plate:#FFFFFF;
+    --danger:#B3423A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    margin:0;
+    color:var(--ink);
+    font-weight:600;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+
+  /* ---- Header ---- */
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 24px;border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:700;font-size:1.25rem;}
+  .brand-mark{
+    width:30px;height:30px;border-radius:7px;background:var(--flash);
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .top-status{font-size:.85rem;color:var(--ink-soft);}
+
+  /* ---- Hero + generator ---- */
+  .studio{
+    display:grid;grid-template-columns:1fr;gap:36px;
+    padding:48px 0 64px;
+  }
+  @media(min-width:960px){
+    .studio{grid-template-columns:0.9fr 1.1fr;align-items:start;}
+  }
+  .pitch h1{font-size:clamp(2.1rem,4vw,3.1rem);line-height:1.08;letter-spacing:-0.01em;}
+  .pitch p{color:var(--ink-soft);font-size:1.05rem;max-width:46ch;margin-top:16px;}
+  .pitch-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+  .tag{
+    border:1px solid var(--line);background:var(--plate);
+    padding:6px 12px;border-radius:20px;font-size:.82rem;color:var(--ink-soft);
+  }
+
+  .panel{
+    background:var(--plate);border:1px solid var(--line);border-radius:16px;
+    padding:22px;box-shadow:0 1px 0 rgba(36,18,38,0.02);
+  }
+  label.field-label{display:block;font-size:.82rem;font-weight:600;color:var(--ink-soft);margin-bottom:8px;}
+  textarea#prompt{
+    width:100%;min-height:96px;resize:vertical;
+    border:1px solid var(--line);border-radius:10px;
+    padding:14px;font-family:'Inter',sans-serif;font-size:1rem;color:var(--ink);
+    background:var(--paper-dim);
+  }
+  textarea#prompt:focus,button:focus-visible,select:focus-visible,input:focus-visible{
+    outline:3px solid #C9A6001a;outline-offset:1px;border-color:var(--flash);
+  }
+
+  .row{margin-top:18px;}
+  .segmented{display:flex;gap:6px;flex-wrap:wrap;}
+  .segmented button{
+    flex:1;min-width:44px;border:1px solid var(--line);background:var(--paper-dim);
+    padding:9px 10px;border-radius:9px;font-size:.88rem;font-weight:600;color:var(--ink-soft);
+    cursor:pointer;transition:background .12s, color .12s, border-color .12s;
+  }
+  .segmented button.active{background:var(--flash-ink);color:var(--flash);border-color:var(--flash-ink);}
+  .segmented button:hover:not(.active){border-color:#C9BCA1;}
+
+  .ratio-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .ratio-btn{
+    border:1px solid var(--line);background:var(--paper-dim);border-radius:10px;
+    padding:10px 6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;
+  }
+  .ratio-btn.active{border-color:var(--flash-ink);background:#FFF5DC;}
+  .ratio-swatch{border:1.6px solid var(--ink-soft);border-radius:2px;}
+  .ratio-btn.active .ratio-swatch{border-color:var(--flash-ink);}
+  .ratio-label{font-size:.72rem;color:var(--ink-soft);}
+
+  select#model, select#quality{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;
+    background:var(--paper-dim);font-size:.95rem;color:var(--ink);font-family:inherit;
+  }
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .generate-btn{
+    margin-top:20px;width:100%;padding:14px 18px;border:none;border-radius:11px;
+    background:var(--flash-ink);color:var(--flash);font-weight:700;font-size:1rem;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .generate-btn:disabled{opacity:.55;cursor:progress;}
+  .generate-btn:hover:not(:disabled){filter:brightness(1.08);}
+  .hint{font-size:.8rem;color:var(--ink-soft);margin-top:10px;text-align:center;}
+  .error-box{
+    margin-top:14px;background:#FBEAE8;border:1px solid var(--danger);color:var(--danger);
+    padding:10px 12px;border-radius:9px;font-size:.88rem;display:none;
+  }
+
+  .results{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .result-card{
+    border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--paper-dim);
+    aspect-ratio:1/1;position:relative;
+  }
+  .result-card img{width:100%;height:100%;object-fit:cover;display:block;}
+  .result-card a.dl{
+    position:absolute;bottom:8px;right:8px;background:rgba(36,18,38,.82);color:#fff;
+    font-size:.72rem;padding:5px 9px;border-radius:7px;text-decoration:none;
+  }
+  .skeleton{
+    background:linear-gradient(100deg,var(--paper-dim) 30%,#EAE1CB 45%,var(--paper-dim) 60%);
+    background-size:200% 100%;animation:shimmer 1.2s infinite;
+  }
+  @keyframes shimmer{from{background-position:180% 0;}to{background-position:-20% 0;}}
+
+  /* ---- Library ---- */
+  .library{padding:64px 0;border-top:1px solid var(--line);}
+  .library h2{font-size:1.7rem;}
+  .library > p{color:var(--ink-soft);max-width:56ch;margin-top:10px;}
+  .lib-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px;}
+  @media(min-width:720px){.lib-grid{grid-template-columns:1fr 1fr;}}
+  .lib-card{
+    border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--plate);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .lib-card .ref{
+    width:100%;aspect-ratio:16/9;border-radius:8px;background:var(--paper-dim);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:.78rem;
+  }
+  .lib-card p{margin:0;font-size:.92rem;color:var(--ink);}
+  .lib-card .copy-btn{
+    align-self:flex-start;border:1px solid var(--line);background:var(--paper-dim);
+    padding:7px 12px;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--ink);
+  }
+  .lib-card .copy-btn:hover{border-color:var(--flash-ink);}
+
+  /* ---- Footer ---- */
+  footer{border-top:1px solid var(--line);padding:40px 0 30px;background:var(--paper-dim);}
+  .foot-grid{display:grid;grid-template-columns:1fr;gap:26px;}
+  @media(min-width:720px){.foot-grid{grid-template-columns:2fr 1fr 1fr 1fr;}}
+  .foot-grid h3{font-size:.85rem;color:var(--ink-soft);margin-bottom:10px;font-family:'Inter',sans-serif;font-weight:700;}
+  .foot-grid ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+  .foot-grid a{text-decoration:none;font-size:.9rem;color:var(--ink);}
+  .foot-grid a:hover{color:var(--flash-ink);}
+  .foot-bottom{margin-top:30px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:.8rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;}
+
+  /* ---- Modal ---- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(36,18,38,.45);display:none;
+    align-items:center;justify-content:center;padding:20px;z-index:50;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--plate);border-radius:16px;padding:28px;max-width:380px;width:100%;
+  }
+  .modal h3{font-size:1.3rem;margin-bottom:8px;}
+  .modal p{color:var(--ink-soft);font-size:.92rem;margin:0 0 18px;}
+  .modal input{
+    width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;margin-bottom:12px;
+    font-family:inherit;font-size:.95rem;
+  }
+  .modal .generate-btn{margin-top:4px;}
+  .modal .close-link{display:block;text-align:center;margin-top:14px;font-size:.85rem;color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><span class="brand-mark">✳</span> ImagineGen</div>
+  <div class="top-status" id="statusLine">5 free images before sign-in</div>
+</header>
+
+<main class="wrap">
+  <section class="studio">
+    <div class="pitch">
+      <h1 id="heroTitle">Type a sentence.<br>Get an image.</h1>
+      <p id="heroSubtitle">Free AI image generation, no credit card, no watermark. Describe what you want to see and ImagineGen renders it in seconds — built for creators, students, and small businesses who need visuals fast.</p>
+      <div class="pitch-tags">
+        <span class="tag">No watermark</span>
+        <span class="tag">100 free images / day</span>
+        <span class="tag">Under 15 sec per image</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <label class="field-label" for="prompt">Describe your image</label>
+      <textarea id="prompt" placeholder="A hand-drawn map of a mountain town, warm autumn colors, illustrated storybook style"></textarea>
+
+      <div class="row">
+        <label class="field-label">Aspect ratio</label>
+        <div class="ratio-grid" id="ratioGrid"></div>
+      </div>
+
+      <div class="row two-col">
+        <div>
+          <label class="field-label">Quantity</label>
+          <div class="segmented" id="qtyRow">
+            <button data-qty="1" class="active">x1</button>
+            <button data-qty="2">x2</button>
+            <button data-qty="3">x3</button>
+            <button data-qty="4">x4</button>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Quality</label>
+          <select id="quality">
+            <option value="1k">1K</option>
+            <option value="2k">2K</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="field-label">Model</label>
+        <select id="model">
+          <option value="gemini-2.5-flash-image">🍌 Nano Banana 2 — fast, everyday quality</option>
+          <option value="gemini-2.5-flash-image-hq">🍌 Nano Banana 2 HQ — slower, higher resolution</option>
+        </select>
+      </div>
+
+      <button class="generate-btn" id="generateBtn">Generate image</button>
+      <div class="hint" id="remainingHint"></div>
+      <div class="error-box" id="errorBox"></div>
+
+      <div class="results" id="results"></div>
+    </div>
+  </section>
+
+  <section class="library">
+    <h2>Prompt library</h2>
+    <p>Not sure where to start? Copy one of these and tweak it — each is paired with a reference image style so you know what to expect.</p>
+    <div class="lib-grid" id="libGrid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <div class="brand" style="margin-bottom:10px;">✳ ImagineGen</div>
+      <p style="color:var(--ink-soft);font-size:.88rem;max-width:32ch;">Free, fast AI image generation for creators, students, and small teams.</p>
+    </div>
+    <div>
+      <h3>Product</h3>
+      <ul>
+        <li><a href="#prompt">Generator</a></li>
+        <li><a href="#" id="footLibLink">Prompt library</a></li>
+        <li><a href="/profile.html">Profile</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Legal</h3>
+      <ul>
+        <li><a href="/privacy.html">Privacy policy</a></li>
+        <li><a href="/terms.html">Terms of service</a></li>
+        <li><a href="/content-policy.html">Content &amp; copyright policy</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Support</h3>
+      <ul>
+        <li><a href="/help.html">Help center</a></li>
+        <li><a href="/contact.html">Contact us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>© <span id="year"></span> ImagineGen. All images are generated by AI.</span>
+    <span>Made for creators everywhere</span>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="signinModal">
+  <div class="modal">
+    <h3>Keep generating</h3>
+    <p>You've used your 5 free images. Sign in with just your name and email to keep going — up to 100 free images a day, still no watermark.</p>
+    <input id="siName" placeholder="Your name">
+    <input id="siEmail" placeholder="Email" type="email">
+    <button class="generate-btn" id="siSubmit">Sign in &amp; continue</button>
+    <span class="close-link" id="siClose">Not now</span>
+  </div>
+</div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---------- Aspect ratio grid ---------- */
+const RATIOS = [
+  {id:'16:9', w:30, h:17},
+  {id:'4:3', w:28, h:21},
+  {id:'1:1', w:24, h:24},
+  {id:'3:4', w:18, h:24},
+  {id:'9:16', w:14, h:25},
+];
+const ratioGrid = document.getElementById('ratioGrid');
+let currentRatio = '1:1';
+RATIOS.forEach(r=>{
+  const btn = document.createElement('button');
+  btn.className = 'ratio-btn' + (r.id===currentRatio ? ' active' : '');
+  btn.innerHTML = `<span class="ratio-swatch" style="width:${r.w}px;height:${r.h}px;"></span><span class="ratio-label">${r.id}</span>`;
+  btn.addEventListener('click', ()=>{
+    currentRatio = r.id;
+    [...ratioGrid.children].forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+  });
+  ratioGrid.appendChild(btn);
+});
+
+/* ---------- Quantity ---------- */
+let currentQty = 1;
+document.getElementById('qtyRow').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentQty = Number(btn.dataset.qty);
+  [...e.currentTarget.children].forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+});
+
+/* ---------- Site config (hero copy, prompt library, free limit) ---------- */
+let FREE_LIMIT = 5; // overwritten by /api/site-config once it loads
+async function loadSiteConfig(){
+  try{
+    const res = await fetch('/api/site-config');
+    if(!res.ok) return;
+    const cfg = await res.json();
+    if(cfg.heroTitle) document.getElementById('heroTitle').innerHTML = cfg.heroTitle.replace(/\n/g,'<br>');
+    if(cfg.heroSubtitle) document.getElementById('heroSubtitle').textContent = cfg.heroSubtitle;
+    if(typeof cfg.freeGenerationsBeforeSignin === 'number'){
+      FREE_LIMIT = cfg.freeGenerationsBeforeSignin;
+      refreshStatusLine();
+    }
+    if(Array.isArray(cfg.promptLibrary) && cfg.promptLibrary.length){
+      renderPromptLibrary(cfg.promptLibrary);
+    }
+  }catch(e){
+    console.warn('Could not load site config, using defaults.', e);
+  }
+}
+
+/* ---------- Usage / sign-in state (demo only — see README) ---------- */
+function getState(){
+  return JSON.parse(localStorage.getItem('imaginegen_state') || '{"count":0,"signedIn":false,"userId":null}');
+}
+function setState(s){ localStorage.setItem('imaginegen_state', JSON.stringify(s)); }
+function refreshStatusLine(){
+  const s = getState();
+  const line = document.getElementById('statusLine');
+  const hint = document.getElementById('remainingHint');
+  if(s.signedIn){
+    line.textContent = 'Signed in — up to 100 images/day';
+    hint.textContent = '';
+  } else {
+    const left = Math.max(FREE_LIMIT - s.count, 0);
+    line.textContent = `${left} free image${left===1?'':'s'} left before sign-in`;
+    hint.textContent = '';
+  }
+}
+refreshStatusLine();
+
+const modal = document.getElementById('signinModal');
+document.getElementById('siClose').addEventListener('click', ()=> modal.classList.remove('open'));
+document.getElementById('siSubmit').addEventListener('click', ()=>{
+  const name = document.getElementById('siName').value.trim();
+  const email = document.getElementById('siEmail').value.trim();
+  if(!name || !email){ return; }
+  const s = getState();
+  s.signedIn = true;
+  s.userId = btoa(email).slice(0,24);
+  setState(s);
+  modal.classList.remove('open');
+  refreshStatusLine();
+});
+
+/* ---------- Generate ---------- */
+const btn = document.getElementById('generateBtn');
+const resultsEl = document.getElementById('results');
+const errorBox = document.getElementById('errorBox');
+
+function showError(msg){
+  errorBox.textContent = msg;
+  errorBox.style.display = 'block';
+}
+function clearError(){ errorBox.style.display = 'none'; }
+
+btn.addEventListener('click', async ()=>{
+  clearError();
+  const prompt = document.getElementById('prompt').value.trim();
+  if(!prompt){ showError('Type a description first.'); return; }
+
+  const s = getState();
+  if(!s.signedIn && s.count >= FREE_LIMIT){
+    modal.classList.add('open');
+    return;
+  }
+
+  const model = document.getElementById('model').value;
+  const quality = document.getElementById('quality').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  resultsEl.innerHTML = '';
+  for(let i=0;i<currentQty;i++){
+    const sk = document.createElement('div');
+    sk.className = 'result-card skeleton';
+    resultsEl.appendChild(sk);
+  }
+
+  try{
+    const res = await fetch('/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        prompt, aspectRatio: currentRatio, quantity: currentQty,
+        quality, model, userId: s.userId, signedIn: s.signedIn
+      })
+    });
+    const data = await res.json();
+
+    if(res.status === 429 && data.signInRequired){
+      modal.classList.add('open');
+      resultsEl.innerHTML = '';
+      return;
+    }
+    if(!res.ok){
+      showError(data.error || 'Something went wrong.');
+      resultsEl.innerHTML = '';
+      return;
+    }
+
+    resultsEl.innerHTML = '';
+    data.images.forEach((src, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.innerHTML = `<img src="${src}" alt="Generated image ${idx+1}"><a class="dl" download="imaginegen-${Date.now()}-${idx}.png" href="${src}">Download</a>`;
+      resultsEl.appendChild(card);
+    });
+
+    if(!s.signedIn){ s.count += data.images.length; setState(s); }
+    refreshStatusLine();
+  }catch(err){
+    console.error(err);
+    showError('Could not reach the server. Is it running?');
+    resultsEl.innerHTML = '';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Generate image';
+  }
+});
+
+/* ---------- Prompt library ---------- */
+const libGrid = document.getElementById('libGrid');
+const FALLBACK_PROMPTS = [
+  {style:'Storybook illustration', text:'A cozy treehouse village at dusk, warm lantern light, hand-drawn storybook illustration style'},
+  {style:'Product mockup', text:'Minimalist ceramic coffee mug on a marble countertop, soft morning light, product photography'},
+  {style:'Social post', text:'Bold flat-design poster announcing a summer sale, bright yellow and coral palette, 1:1'},
+  {style:'Presentation graphic', text:'Clean isometric diagram of a solar-powered smart home, pastel colors, for a school presentation'},
+];
+function renderPromptLibrary(prompts){
+  libGrid.innerHTML = '';
+  prompts.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'lib-card';
+    card.innerHTML = `<div class="ref">${p.style} reference</div><p>${p.text}</p><button class="copy-btn">Copy prompt</button>`;
+    card.querySelector('.copy-btn').addEventListener('click', (e)=>{
+      navigator.clipboard.writeText(p.text);
+      e.target.textContent = 'Copied!';
+      setTimeout(()=> e.target.textContent = 'Copy prompt', 1400);
+    });
+    libGrid.appendChild(card);
+  });
+}
+renderPromptLibrary(FALLBACK_PROMPTS);
+
+document.getElementById('footLibLink').addEventListener('click', (e)=>{
+  e.preventDefault();
+  document.querySelector('.library').scrollIntoView({behavior:'smooth'});
+});
+
+loadSiteConfig();
+</script>
+</body>
+</html>
